@@ -70,7 +70,7 @@ class RegistrationAction(bot: Bot, message: Message): Action(bot, message) {
         if (message.text == AGREE) {
             sendMessage(message.chatId, FINISH_REGISTRATION)
             student.registerDate = LocalDateTime.now().truncatedTo(ChronoUnit.MINUTES).toString()
-            student.lastCheckinDate = LocalDateTime.now().truncatedTo(ChronoUnit.MINUTES).toString()
+            student.lastCheckinDate = student.registerDate
             student.checkinCount = "1"
 
             if (GoogleSheetsUtil.addStudent(student)) {

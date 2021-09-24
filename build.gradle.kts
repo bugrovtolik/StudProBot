@@ -21,13 +21,9 @@ dependencies {
     implementation("com.google.auth:google-auth-library-oauth2-http:1.1.0")
 }
 
-application {
-    mainClass.set("MainKt")
-}
-
 tasks {
     withType<Jar> {
-        manifest { attributes(mapOf("Main-Class" to application.mainClass)) }
+        manifest { attributes(mapOf("Main-Class" to "MainKt")) }
     }
     register("stage") {
         dependsOn("build")

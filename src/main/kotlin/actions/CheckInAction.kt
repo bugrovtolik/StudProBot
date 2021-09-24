@@ -32,7 +32,7 @@ class CheckInAction(bot: Bot, message: Message): Action(bot, message) {
         if (message.text == YES) {
             sendMessage(chatId, THANKS, markup = MarkupUtil.getDefaultMarkup())
             GoogleSheetsUtil.updateColumn("E", chatId, LocalDateTime.now().truncatedTo(ChronoUnit.MINUTES).toString())
-            GoogleSheetsUtil.updateColumn("F", chatId, student?.checkinCount?.toInt()?.plus(1).toString())
+            GoogleSheetsUtil.updateColumn("F", chatId, (student?.checkinCount?.toInt()?.plus(1) ?: 1).toString())
         } else {
             sendMessage(chatId, OK)
         }

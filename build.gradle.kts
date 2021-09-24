@@ -1,7 +1,7 @@
 plugins {
     application
-    kotlin("jvm") version "1.4.31"
-    kotlin("plugin.serialization") version "1.4.31"
+    kotlin("jvm") version "1.5.31"
+    kotlin("plugin.serialization") version "1.5.31"
     id("com.github.johnrengelman.shadow") version "6.1.0"
 }
 
@@ -14,20 +14,20 @@ repositories {
 }
 
 dependencies {
-    implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.1.0")
-    implementation("org.telegram:telegrambots:5.1.0")
-    implementation("redis.clients:jedis:3.5.1")
-    implementation("com.google.apis:google-api-services-sheets:v4-rev20200922-1.30.10")
-    implementation("com.google.auth:google-auth-library-oauth2-http:0.21.1")
+    implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.2.2")
+    implementation("org.telegram:telegrambots:5.3.0")
+    implementation("redis.clients:jedis:3.6.3")
+    implementation("com.google.apis:google-api-services-sheets:v4-rev20210629-1.32.1")
+    implementation("com.google.auth:google-auth-library-oauth2-http:1.1.0")
 }
 
 application {
-    mainClassName = "MainKt"
+    mainClass.set("MainKt")
 }
 
 tasks {
     withType<Jar> {
-        manifest { attributes(mapOf("Main-Class" to application.mainClassName)) }
+        manifest { attributes(mapOf("Main-Class" to application.mainClass)) }
     }
     register("stage") {
         dependsOn("build")

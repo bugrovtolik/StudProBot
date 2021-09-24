@@ -1,5 +1,5 @@
 import com.google.api.client.googleapis.javanet.GoogleNetHttpTransport
-import com.google.api.client.json.jackson2.JacksonFactory
+import com.google.api.client.json.gson.GsonFactory
 import com.google.api.client.util.PemReader
 import com.google.api.client.util.SecurityUtils
 import com.google.api.services.sheets.v4.Sheets
@@ -13,6 +13,7 @@ import java.security.spec.PKCS8EncodedKeySpec
 import java.time.LocalDate
 
 object GoogleSheetsUtil {
+
     private fun readFromSheet(range: String): Any? {
         return getSheets().spreadsheets().values()[System.getenv("documentId"), range].execute()["values"]
     }
@@ -28,13 +29,13 @@ object GoogleSheetsUtil {
         val documentId = System.getenv("documentId")
         val students = getStudents()
         val stdIndex = students.indexOfFirst { it.id == id.toString() }
-        val row = 2 + if (stdIndex >= 0) stdIndex else students.count()
+        val row = 2 + if (stdIndex >= 0) stdIndex else students.size
         val data = ValueRange().setValues(listOf(listOf(text)))
         getSheets().spreadsheets().values().update(documentId, "$sheetName!$column$row", data).setValueInputOption("USER_ENTERED").execute()
     }
 
     fun checkedInToday(chatId: Long): Boolean {
-        return getStudents().any { it.id == chatId.toString() && it.lastCheckinDate?.substring(0..9) == LocalDate.now().toString() }
+        return getStudents().any { it.id == chatId.toString() && it.lastCheckinDate?.takeIf { it.length > 9 }?.substring(0..9) == LocalDate.now().toString() }
     }
 
     fun getStudentById(chatId: Long): Student? {
@@ -51,9 +52,9 @@ object GoogleSheetsUtil {
 
     private fun getStudents(): List<Student> {
         val sheetName = System.getenv("sheetName")
-        return (readFromSheet(sheetName) as List<*>).drop(1).filterIsInstance<List<String>>().map {
+        return (readFromSheet(sheetName) as List<*>).drop(1).filterIsInstance<List<String>>().mapNotNull {
             Student(
-                id = it[0],
+                id = it.getOrNull(0) ?: return@mapNotNull null,
                 firstName = it.getOrNull(1),
                 lastName = it.getOrNull(2),
                 comment = it.getOrNull(3),
@@ -62,7 +63,8 @@ object GoogleSheetsUtil {
                 registerDate = it.getOrNull(6),
                 university = it.getOrNull(7),
                 yearStudy = it.getOrNull(8),
-                studProInfo = it.getOrNull(9)
+                studProInfo = it.getOrNull(9),
+                status = it.getOrNull(10)?.let { status -> Student.Status.values().find { it.name == status } }
             )
         }
     }
@@ -76,7 +78,7 @@ object GoogleSheetsUtil {
 
         return Sheets.Builder(
             GoogleNetHttpTransport.newTrustedTransport(),
-            JacksonFactory.getDefaultInstance(),
+            GsonFactory.getDefaultInstance(),
             HttpCredentialsAdapter(credentials)
         ).apply { applicationName = "app" }.build()
     }

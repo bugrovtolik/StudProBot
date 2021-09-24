@@ -1,2 +1,2 @@
-rootProject.name = "StudProBot"
+rootProject.name = "kyiv-campus-bot"
 

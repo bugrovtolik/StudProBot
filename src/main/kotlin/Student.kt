@@ -1,3 +1,6 @@
+import kotlinx.serialization.Serializable
+
+@Serializable
 data class Student(
     val id: String,
     var firstName: String? = null,

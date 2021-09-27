@@ -1,8 +1,7 @@
 import MessageTexts.CHECKIN
 import MessageTexts.FEEDBACK
-import MessageTexts.START
 import MessageTexts.SUBSCRIBE
-import MessageTexts.WHOIAM
+import MessageTexts.WHOAMI
 import actions.ActionHandler
 import org.telegram.telegrambots.bots.TelegramLongPollingBot
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage
@@ -11,16 +10,22 @@ import org.telegram.telegrambots.meta.api.objects.Update
 
 class Bot : TelegramLongPollingBot() {
     override fun onUpdateReceived(update: Update) {
-        val actions = ActionHandler(this, update.message)
-
         try {
-            when (update.message.text) {
-                START -> actions.start()
+            val student = Database.getStudentById(update.message.chatId)
+            val actions = ActionHandler(this, update.message, student)
+            val command = update.message.text
+
+            if (student.isNew) return actions.start()
+            if (student.hasMissingData()) {
+                return if (command !in listOf(CHECKIN, FEEDBACK, SUBSCRIBE, WHOAMI)) actions.fillMissingData() else actions.askAgain()
+            }
+
+            when (command) {
                 CHECKIN -> actions.checkin()
                 FEEDBACK -> actions.feedback()
                 SUBSCRIBE -> actions.subscribe()
-                WHOIAM -> actions.whoIAm()
-                else -> actions.default()
+                WHOAMI -> actions.whoIAm()
+                else -> actions.continueAction()
             }
         } catch (exception: Exception) {
             sendErrorMessage(update.message, exception)

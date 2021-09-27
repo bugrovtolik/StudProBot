@@ -1,7 +1,6 @@
 object MessageTexts {
-    const val START = "/start"
     const val CHECKIN = "Зачекінитися"
-    const val WHOIAM = "ЯХТО"
+    const val WHOAMI = "ЯХТО"
     const val SUBSCRIBE = "Підписатися на новини"
     const val FEEDBACK = "Залишити відгук"
     val GREETING = """
@@ -15,10 +14,10 @@ object MessageTexts {
         
         Якщо ти у нас вперше – заповни, будь ласка, анкету та ознайомся з правилами використання простору.
     """.trimIndent()
-    const val ASK_FIRST_NAME = "Як тебе звуть? (просто ім'я)"
-    const val ASK_LAST_NAME = "А прізвище?"
+    const val ASK_FIRST_NAME = "Як тебе звуть? (тільки ім'я, без фамілії)"
+    const val ASK_LAST_NAME = "А яке в тебе прізвище?"
     const val ASK_UNIVERSITY = "Приємно познайомитися, %s!\nЗ якого ти університету?\n(обери зі списку або напиши)"
-    const val ASK_YEAR_STUDY = "Який курс?"
+    const val ASK_YEAR_STUDY = "А нагадай який ти курс?"
     const val WRONG_YEAR_STUDY = "Просто число від 1 до 6 включно"
     const val ASK_STUD_PRO = "А як ти дізнався про Student Prostir?\n(обери зі списку або напиши)"
     const val ASK_RULES = "І наостанок, будь-ласка, ознайомся з правилами перебування в Student Prostir"
@@ -49,15 +48,14 @@ object MessageTexts {
     const val FORCE_AGREE = "Правила є правила, перед тим як користуватися Student Prostir ти маєш ознайомитися і погодитися з ними"
     const val FINISH_REGISTRATION = "Це все, дякую тобі, тепер в майбутньому тобі достатньо буде натиснути \"Зачекінитися\"\nWi-Fi - Campus Ukraine\nPassword - StudentProstir2018"
     const val THANKS = "Дякую, Have Fun! :)"
-    const val WANNA_CHECKIN = "Ти знаходишся в Student Prostir і бажаєш зачекінитися?"
-    const val ALREADY_CHECKED_IN = "Здається ти вже сьогодні чекінився.."
+    const val WANNA_CHECKIN = "Привіт, %s, ти знаходишся в Student Prostir і бажаєш зачекінитися?"
+    const val ALREADY_CHECKED_IN = "Схоже ти вже сьогодні чекінився.."
     const val SUBSCRIBED = "Дякую, ти знайдеш наш телеграм канал за наступним посиланням"
     const val WANNA_FEEDBACK = "Напиши мені відгук"
     const val RESULT_FEEDBACK = "Дякую, зворотній зв'язок зі студентами допомагає нам вдосконалюватися!"
     const val OK = "Гаразд"
     const val YES = "Так"
     const val NO = "Ні"
-    const val DEFAULT = "Інколи я не розумію людей з першого разу, вибач.. можеш повторити? :)"
     val WHO_I_AM_INFO = """
             Проект ЯХТО
             

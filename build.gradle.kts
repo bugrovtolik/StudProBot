@@ -14,9 +14,7 @@ repositories {
 }
 
 dependencies {
-    implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.2.2")
     implementation("org.telegram:telegrambots:4.1")
-    implementation("redis.clients:jedis:3.6.3")
     implementation("com.google.apis:google-api-services-sheets:v4-rev20210629-1.32.1")
     implementation("com.google.auth:google-auth-library-oauth2-http:1.1.0")
 }

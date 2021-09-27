@@ -5,7 +5,7 @@ import MessageTexts.INVITE_CAMPUS_CHANNEL_LINK
 import MessageTexts.INVITE_CAMPUS_CHANNEL_TEXT
 import MessageTexts.NO
 import MessageTexts.SUBSCRIBE
-import MessageTexts.WHOIAM
+import MessageTexts.WHOAMI
 import MessageTexts.WHO_I_AM_MORE_INFO_LINK
 import MessageTexts.WHO_I_AM_MORE_INFO_TEXT
 import MessageTexts.WHO_I_AM_REGISTRATION_LINK
@@ -25,7 +25,7 @@ object MarkupUtil {
         return ReplyKeyboardMarkup().apply {
             keyboard = listOf(
                 KeyboardRow().apply { add(CHECKIN) },
-                KeyboardRow().apply { add(WHOIAM) },
+                KeyboardRow().apply { add(WHOAMI) },
                 KeyboardRow().apply { add(SUBSCRIBE) },
                 KeyboardRow().apply { add(FEEDBACK) }
             )

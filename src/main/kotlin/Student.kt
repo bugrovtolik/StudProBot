@@ -1,20 +1,28 @@
-import kotlinx.serialization.Serializable
-
-@Serializable
 data class Student(
     val id: String,
-    var firstName: String? = null,
-    var lastName: String? = null,
-    var comment: String? = null,
-    var lastCheckinDate: String? = null,
-    var checkinCount: String? = null,
-    var registerDate: String? = null,
-    var university: String? = null,
-    var yearStudy: String? = null,
-    var studProInfo: String? = null,
-    var status: Status? = null
+    val firstName: String? = null,
+    val lastName: String? = null,
+    val comment: String? = null,
+    val lastCheckinDate: String? = null,
+    val checkinCount: String? = null,
+    val registerDate: String? = null,
+    val university: String? = null,
+    val yearStudy: String? = null,
+    val studProInfo: String? = null,
+    val seenWhoAmI: String? = null,
+    val status: String? = null,
+
+    val isNew: Boolean = false
 ) {
     enum class Status {
         REGISTRATION, CHECKIN, FEEDBACK
+    }
+
+    fun getDatabaseProps(): List<String?> {
+        return listOf(id, firstName, lastName, comment, lastCheckinDate, checkinCount, registerDate, university, yearStudy, studProInfo, seenWhoAmI, status)
+    }
+
+    fun hasMissingData(): Boolean {
+        return listOf(firstName, lastName, lastCheckinDate, checkinCount, registerDate, university, yearStudy, studProInfo).any { it.isNullOrBlank() }
     }
 }

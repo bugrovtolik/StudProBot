@@ -1,14 +1,12 @@
 package actions
 
 import Bot
-import MessageTexts.DEFAULT
+import Student
 import org.telegram.telegrambots.meta.api.objects.Message
 
-class DefaultAction(bot: Bot, message: Message): Action(bot, message) {
+class DefaultAction(bot: Bot, message: Message, student: Student): Action(bot, message, student) {
 
     fun forwardAdmin() {
-        val adminChatId = System.getenv("adminChatId").toLong()
-        sendMessage(message.chatId, DEFAULT)
-        forwardMessage(adminChatId, message.chatId, message.messageId)
+        forwardMessage(System.getenv("adminChatId"), student.id, message.messageId)
     }
 }

@@ -1,7 +1,7 @@
 package actions
 
 import Bot
-import GoogleSheetsUtil
+import Database
 import MessageTexts.AGREE
 import MessageTexts.ASK_FIRST_NAME
 import MessageTexts.ASK_LAST_NAME
@@ -15,85 +15,91 @@ import MessageTexts.GREETING
 import MessageTexts.RULES
 import MessageTexts.WRONG_YEAR_STUDY
 import Student
+import Student.Status.REGISTRATION
 import org.telegram.telegrambots.meta.api.objects.Message
 import java.time.LocalDateTime
 import java.time.temporal.ChronoUnit
 
-class RegistrationAction(bot: Bot, message: Message): Action(bot, message) {
+class RegistrationAction(bot: Bot, message: Message, student: Student): Action(bot, message, student) {
 
     fun start() {
-        val chatId = message.chatId
-        if (chatId == System.getenv("feedbackChatId").toLong() || GoogleSheetsUtil.getStudentById(chatId) != null) return
+        if (student.id == System.getenv("feedbackChatId")) return
+        if (student.status == REGISTRATION.name || !student.isNew) return
 
-        sendMessage(chatId, GREETING, null)
-        sendMessage(chatId, ASK_FIRST_NAME, null)
-        Database.saveStudent(Student(id = chatId.toString()))
-        saveState()
+        Database.addStudent(student.copy(status = REGISTRATION.name))
+        sendMessage(student.id, GREETING, null)
+        askFirstName()
     }
 
-    private fun askLastName(student: Student) {
-        sendMessage(message.chatId, ASK_LAST_NAME, null)
-        student.firstName = message.text
-        Database.saveStudent(student)
+    private fun askFirstName() {
+        sendMessage(student.id, ASK_FIRST_NAME, null)
     }
 
-    private fun askUniversity(student: Student) {
-        sendMessage(message.chatId, ASK_UNIVERSITY.format(student.firstName), markup = MarkupUtil.getUniversitiesMarkup())
-        student.lastName = message.text
-        Database.saveStudent(student)
+    private fun askLastName(firstName: String? = null) {
+        if (firstName != null) Database.updateColumn(Student::firstName, student.id, firstName)
+        sendMessage(student.id, ASK_LAST_NAME, null)
     }
 
-    private fun askYearStudy(student: Student) {
-        sendMessage(message.chatId, ASK_YEAR_STUDY, markup = MarkupUtil.getYearStudyMarkup())
-        student.university = message.text
-        Database.saveStudent(student)
+    private fun askUniversity(lastName: String? = null) {
+        if (lastName != null) Database.updateColumn(Student::lastName, student.id, lastName)
+        sendMessage(student.id, ASK_UNIVERSITY.format(student.firstName), markup = MarkupUtil.getUniversitiesMarkup())
     }
 
-    private fun askStudPro(student: Student) {
-        if (message.text?.toIntOrNull() in 1..6) {
-            sendMessage(message.chatId, ASK_STUD_PRO, markup = MarkupUtil.getStudProMarkup())
-            student.yearStudy = message.text
-            Database.saveStudent(student)
+    private fun askYearStudy(university: String? = null) {
+        if (university != null) Database.updateColumn(Student::university, student.id, university)
+        sendMessage(student.id, ASK_YEAR_STUDY, markup = MarkupUtil.getYearStudyMarkup())
+    }
+
+    private fun askStudPro(yearStudy: String? = null) {
+        if (yearStudy?.toIntOrNull() in 1..6) {
+            if (yearStudy != null) Database.updateColumn(Student::yearStudy, student.id, yearStudy)
+            sendMessage(student.id, ASK_STUD_PRO, markup = MarkupUtil.getStudProMarkup())
         } else {
-            sendMessage(message.chatId, WRONG_YEAR_STUDY, markup = MarkupUtil.getYearStudyMarkup())
+            sendMessage(student.id, WRONG_YEAR_STUDY, markup = MarkupUtil.getYearStudyMarkup())
         }
     }
 
-    private fun askRules(student: Student) {
-        sendMessage(message.chatId, ASK_RULES, null)
-        sendMessage(message.chatId, RULES, markup = MarkupUtil.getAgreeRulesMarkup())
-        student.studProInfo = message.text
-        Database.saveStudent(student)
+    private fun askRules(studProInfo: String? = null) {
+        if (studProInfo != null) Database.updateColumn(Student::studProInfo, student.id, studProInfo)
+        sendMessage(student.id, ASK_RULES, null)
+        sendMessage(student.id, RULES, markup = MarkupUtil.getAgreeRulesMarkup())
     }
 
-    private fun finish(student: Student) {
-        if (message.text == AGREE) {
-            sendMessage(message.chatId, FINISH_REGISTRATION)
-            student.registerDate = LocalDateTime.now().truncatedTo(ChronoUnit.MINUTES).toString()
-            student.lastCheckinDate = student.registerDate
-            student.checkinCount = "1"
+    private fun finish(rules: String? = null) {
+        if (rules == null || rules == AGREE) {
+            val registerDate = LocalDateTime.now().truncatedTo(ChronoUnit.MINUTES).toString()
 
-            if (GoogleSheetsUtil.addStudent(student)) {
-                Database.deleteStudent(student)
-                deleteState()
-            }
+            Database.updateColumn(Student::registerDate, student.id, registerDate)
+            Database.updateColumn(Student::lastCheckinDate, student.id, registerDate)
+            Database.updateColumn(Student::checkinCount, student.id, "1")
+            Database.deleteStatus(student.id)
+
+            sendMessage(student.id, FINISH_REGISTRATION)
         } else {
-            sendMessage(message.chatId, FORCE_AGREE, markup = MarkupUtil.getAgreeRulesMarkup())
+            sendMessage(student.id, FORCE_AGREE, markup = MarkupUtil.getAgreeRulesMarkup())
         }
     }
 
-    fun fillMissing() {
-        val student = Database.getStudentById(message.chatId) ?: return
+    fun saveAskNext() {
+        when {
+            student.firstName.isNullOrBlank() -> askLastName(firstName = message.text)
+            student.lastName.isNullOrBlank() -> askUniversity(lastName = message.text)
+            student.university.isNullOrBlank() -> askYearStudy(university = message.text)
+            student.yearStudy.isNullOrBlank() -> askStudPro(yearStudy = message.text)
+            student.studProInfo.isNullOrBlank() -> askRules(studProInfo = message.text)
+            else -> finish(rules = message.text)
+        }
+    }
 
-        with (student) {
-            when {
-                firstName == null -> askLastName(student)
-                lastName == null -> askUniversity(student)
-                university == null -> askYearStudy(student)
-                yearStudy == null -> askStudPro(student)
-                studProInfo == null -> askRules(student)
-                else -> finish(student)
-            }
+    fun askAgain() {
+        if (student.status != REGISTRATION.name) Database.saveStatus(student.id, REGISTRATION)
+        when {
+            student.firstName.isNullOrBlank() -> askFirstName()
+            student.lastName.isNullOrBlank() -> askLastName()
+            student.university.isNullOrBlank() -> askUniversity()
+            student.yearStudy.isNullOrBlank() -> askYearStudy()
+            student.studProInfo.isNullOrBlank() -> askStudPro()
+            else -> finish()
         }
     }
 }

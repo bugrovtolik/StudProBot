@@ -1,7 +1,7 @@
 package actions
 
 import Bot
-import GoogleSheetsUtil
+import Database
 import MarkupUtil
 import MessageTexts.ALREADY_CHECKED_IN
 import MessageTexts.OK
@@ -9,34 +9,32 @@ import MessageTexts.THANKS
 import MessageTexts.WANNA_CHECKIN
 import MessageTexts.YES
 import Student
+import Student.Status.CHECKIN
 import org.telegram.telegrambots.meta.api.objects.Message
+import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.temporal.ChronoUnit
 
-class CheckInAction(bot: Bot, message: Message): Action(bot, message) {
+class CheckInAction(bot: Bot, message: Message, student: Student): Action(bot, message, student) {
 
     fun ask() {
-        val chatId = message.chatId
-
-        if (GoogleSheetsUtil.checkedInToday(chatId)) {
-            sendMessage(chatId, ALREADY_CHECKED_IN)
+        if (student.lastCheckinDate?.takeIf { it.length > 9 }?.substring(0..9) == LocalDate.now().toString()) {
+            sendMessage(student.id, ALREADY_CHECKED_IN)
         } else {
-            sendMessage(chatId, WANNA_CHECKIN, markup = MarkupUtil.getYesNoMarkup())
-            saveState()
+            sendMessage(student.id, WANNA_CHECKIN.format(student.firstName), markup = MarkupUtil.getYesNoMarkup())
+            Database.saveStatus(student.id, CHECKIN)
         }
     }
 
-    fun update(student: Student?) {
-        val chatId = message.chatId
-
+    fun update() {
         if (message.text == YES) {
-            sendMessage(chatId, THANKS, markup = MarkupUtil.getDefaultMarkup())
-            GoogleSheetsUtil.updateColumn("E", chatId, LocalDateTime.now().truncatedTo(ChronoUnit.MINUTES).toString())
-            GoogleSheetsUtil.updateColumn("F", chatId, (student?.checkinCount?.toInt()?.plus(1) ?: 1).toString())
+            sendMessage(student.id, THANKS, markup = MarkupUtil.getDefaultMarkup())
+            Database.updateColumn(Student::lastCheckinDate, student.id, LocalDateTime.now().truncatedTo(ChronoUnit.MINUTES).toString())
+            Database.updateColumn(Student::checkinCount, student.id, (student.checkinCount?.toInt()?.plus(1) ?: 1).toString())
         } else {
-            sendMessage(chatId, OK)
+            sendMessage(student.id, OK)
         }
 
-        deleteState()
+        Database.deleteStatus(student.id)
     }
 }

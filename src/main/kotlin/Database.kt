@@ -40,14 +40,6 @@ object Database {
         getSheets().spreadsheets().values().update(documentId, "$sheetName!$column$row", data).setValueInputOption("USER_ENTERED").execute()
     }
 
-    fun saveStatus(studentId: String, status: Student.Status) {
-        updateColumn(Student::status, studentId, status.name)
-    }
-
-    fun deleteStatus(studentId: String) {
-        updateColumn(Student::status, studentId, "")
-    }
-
     fun getStudentById(studentId: Long): Student {
         return getStudents().find { it.id == studentId.toString() } ?: Student(id = studentId.toString(), isNew = true)
     }

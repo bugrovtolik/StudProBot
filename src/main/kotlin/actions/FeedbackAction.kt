@@ -14,7 +14,7 @@ class FeedbackAction(bot: Bot, message: Message, student: Student): Action(bot, 
 
     fun ask() {
         sendMessage(student.id, WANNA_FEEDBACK, markup = MarkupUtil.getNoMarkup())
-        Database.saveStatus(student.id, FEEDBACK)
+        saveStatus(FEEDBACK)
     }
 
     fun forward() {
@@ -25,7 +25,7 @@ class FeedbackAction(bot: Bot, message: Message, student: Student): Action(bot, 
             forwardMessage(System.getenv("feedbackChatId"), student.id, message.messageId)
         }
 
-        Database.deleteStatus(student.id)
+        deleteStatus()
     }
 
     fun reply() {

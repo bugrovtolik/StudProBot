@@ -22,7 +22,7 @@ class CheckInAction(bot: Bot, message: Message, student: Student): Action(bot, m
             sendMessage(student.id, ALREADY_CHECKED_IN)
         } else {
             sendMessage(student.id, WANNA_CHECKIN.format(student.firstName), markup = MarkupUtil.getYesNoMarkup())
-            Database.saveStatus(student.id, CHECKIN)
+            saveStatus(CHECKIN)
         }
     }
 
@@ -35,6 +35,6 @@ class CheckInAction(bot: Bot, message: Message, student: Student): Action(bot, m
             sendMessage(student.id, OK)
         }
 
-        Database.deleteStatus(student.id)
+        deleteStatus()
     }
 }

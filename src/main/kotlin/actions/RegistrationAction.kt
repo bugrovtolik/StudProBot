@@ -72,7 +72,7 @@ class RegistrationAction(bot: Bot, message: Message, student: Student): Action(b
             Database.updateColumn(Student::registerDate, student.id, registerDate)
             Database.updateColumn(Student::lastCheckinDate, student.id, registerDate)
             Database.updateColumn(Student::checkinCount, student.id, "1")
-            Database.deleteStatus(student.id)
+            deleteStatus()
 
             sendMessage(student.id, FINISH_REGISTRATION)
         } else {
@@ -92,7 +92,7 @@ class RegistrationAction(bot: Bot, message: Message, student: Student): Action(b
     }
 
     fun askAgain() {
-        if (student.status != REGISTRATION.name) Database.saveStatus(student.id, REGISTRATION)
+        if (student.status != REGISTRATION.name) saveStatus(REGISTRATION)
         when {
             student.firstName.isNullOrBlank() -> askFirstName()
             student.lastName.isNullOrBlank() -> askLastName()

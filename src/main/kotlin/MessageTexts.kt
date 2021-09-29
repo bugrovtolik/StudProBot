@@ -56,6 +56,7 @@ object MessageTexts {
     const val OK = "Гаразд"
     const val YES = "Так"
     const val NO = "Ні"
+    const val DEFAULT = "Повтори, будь-ласка.."
     val WHO_I_AM_INFO = """
             Проект ЯХТО
             

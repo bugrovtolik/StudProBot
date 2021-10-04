@@ -40,17 +40,17 @@ class Bot : TelegramLongPollingBot() {
         return "@KyivCampusBot"
     }
 
-    private fun sendErrorMessage(message: Message, exception: Exception) {
+    private fun sendErrorMessage(message: Message?, exception: Exception) {
         val sendMsg = SendMessage()
         sendMsg.chatId = System.getenv("adminChatId")
         sendMsg.text = """
             exception: ${exception.localizedMessage}
             action: ${exception.stackTrace.find { it.className == ActionHandler::class.java.name }?.methodName}
             user: {
-                id: ${message.chatId}
-                firstName: ${message.chat.firstName}
-                lastName: ${message.chat.lastName}
-                userName: @${message.chat.userName}
+                id: ${message?.chatId}
+                firstName: ${message?.chat?.firstName}
+                lastName: ${message?.chat?.lastName}
+                userName: @${message?.chat?.userName}
             }
         """.trimIndent()
 

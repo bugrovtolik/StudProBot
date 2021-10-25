@@ -1,6 +1,7 @@
 package actions
 
 import Bot
+import Database
 import Student
 import Student.Status.*
 import org.telegram.telegrambots.meta.api.objects.Message
@@ -9,12 +10,13 @@ class ActionHandler(
     private val bot: Bot,
     private val message: Message,
     private val student: Student,
-    private val registration: RegistrationAction = RegistrationAction(bot, message, student),
-    private val checkIn: CheckInAction = CheckInAction(bot, message, student),
-    private val feedback: FeedbackAction = FeedbackAction(bot, message, student),
-    private val subscribe: SubscribeAction = SubscribeAction(bot, message, student),
-    private val whoIAm: WhoIAmAction = WhoIAmAction(bot, message, student),
-    private val default: DefaultAction = DefaultAction(bot, message, student)
+    private val database: Database,
+    private val registration: RegistrationAction = RegistrationAction(bot, message, student, database),
+    private val checkIn: CheckInAction = CheckInAction(bot, message, student, database),
+    private val feedback: FeedbackAction = FeedbackAction(bot, message, student, database),
+    private val subscribe: SubscribeAction = SubscribeAction(bot, message, student, database),
+    private val whoIAm: WhoIAmAction = WhoIAmAction(bot, message, student, database),
+    private val default: DefaultAction = DefaultAction(bot, message, student, database)
 ) {
     fun start() {
         registration.start()
@@ -36,12 +38,12 @@ class ActionHandler(
         whoIAm.sendInfo()
     }
 
-    fun askAgain() {
-        registration.askAgain()
-    }
-
-    fun fillMissingData() {
-        if (student.status == REGISTRATION.name) registration.saveAskNext() else registration.askAgain()
+    fun fillMissingData(isMainCmd: Boolean) {
+        if (student.status == REGISTRATION.name && !isMainCmd) {
+            registration.saveAskNext()
+        } else {
+            registration.askAgain()
+        }
     }
 
     fun continueAction() {

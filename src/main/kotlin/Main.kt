@@ -1,9 +1,6 @@
-import org.telegram.telegrambots.ApiContextInitializer
 import org.telegram.telegrambots.meta.TelegramBotsApi
+import org.telegram.telegrambots.updatesreceivers.DefaultBotSession
 
 fun main() {
-    ApiContextInitializer.init()
-    val telegramBotsApi = TelegramBotsApi()
-    val bot = Bot()
-    telegramBotsApi.registerBot(bot)
+    TelegramBotsApi(DefaultBotSession::class.java).registerBot(Bot())
 }

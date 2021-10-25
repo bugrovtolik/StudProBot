@@ -1,7 +1,7 @@
 package actions
 
 import Bot
-import Database.updateColumn
+import Database
 import MarkupUtil
 import Student
 import org.telegram.telegrambots.meta.api.methods.ForwardMessage
@@ -12,14 +12,15 @@ import org.telegram.telegrambots.meta.api.objects.replykeyboard.ReplyKeyboard
 abstract class Action(
     private val bot: Bot,
     protected val message: Message,
-    protected val student: Student
+    protected val student: Student,
+    protected val database: Database
 ) {
     protected fun saveStatus(status: Student.Status) {
-        updateColumn(Student::status, student.id, status.name)
+        database.updateColumn(Student::status, status.name)
     }
 
     protected fun deleteStatus() {
-        updateColumn(Student::status, student.id, "")
+        database.updateColumn(Student::status, "")
     }
 
     protected fun sendMessage(chatId: String, text: String, markup: ReplyKeyboard? = MarkupUtil.getDefaultMarkup()) {

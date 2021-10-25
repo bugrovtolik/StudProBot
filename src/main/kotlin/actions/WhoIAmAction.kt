@@ -7,12 +7,12 @@ import MessageTexts.WHO_I_AM_INFO
 import Student
 import org.telegram.telegrambots.meta.api.objects.Message
 
-class WhoIAmAction(bot: Bot, message: Message, student: Student): Action(bot, message, student) {
+class WhoIAmAction(bot: Bot, message: Message, student: Student, database: Database): Action(bot, message, student, database) {
 
     fun sendInfo() {
         sendMessage(student.id, WHO_I_AM_INFO, markup = MarkupUtil.getWhoIAmMarkup())
         if (student.seenWhoAmI.isNullOrEmpty()) {
-            Database.updateColumn(Student::seenWhoAmI, student.id, "'+")
+            database.updateColumn(Student::seenWhoAmI, "'+")
         }
     }
 }

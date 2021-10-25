@@ -15,7 +15,7 @@ import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.temporal.ChronoUnit
 
-class CheckInAction(bot: Bot, message: Message, student: Student): Action(bot, message, student) {
+class CheckInAction(bot: Bot, message: Message, student: Student, database: Database): Action(bot, message, student, database) {
 
     fun ask() {
         if (student.lastCheckinDate?.takeIf { it.length > 9 }?.substring(0..9) == LocalDate.now().toString()) {
@@ -29,8 +29,11 @@ class CheckInAction(bot: Bot, message: Message, student: Student): Action(bot, m
     fun update() {
         if (message.text == YES) {
             sendMessage(student.id, THANKS, markup = MarkupUtil.getDefaultMarkup())
-            Database.updateColumn(Student::lastCheckinDate, student.id, LocalDateTime.now().truncatedTo(ChronoUnit.MINUTES).toString())
-            Database.updateColumn(Student::checkinCount, student.id, (student.checkinCount?.toInt()?.plus(1) ?: 1).toString())
+            database.updateColumn(
+                Student::lastCheckinDate,
+                LocalDateTime.now().truncatedTo(ChronoUnit.MINUTES).toString()
+            )
+            database.updateColumn(Student::checkinCount, (student.checkinCount?.toInt()?.plus(1) ?: 1).toString())
         } else {
             sendMessage(student.id, OK)
         }

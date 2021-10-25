@@ -11,22 +11,25 @@ import org.telegram.telegrambots.meta.api.objects.Update
 class Bot : TelegramLongPollingBot() {
     override fun onUpdateReceived(update: Update) {
         try {
-            val student = Database.getStudentById(update.message.chatId)
-            val actions = ActionHandler(this, update.message, student)
+            val database = Database()
+            val student = database.getStudentById(update.message.chatId)
+            val actions = ActionHandler(this, update.message, student, database)
             val command = update.message.text
+            val isMainCmd = command in listOf(CHECKIN, FEEDBACK, SUBSCRIBE, WHOAMI)
 
-            if (student.isNew) return actions.start()
-            if (student.hasMissingData()) {
-                return if (command !in listOf(CHECKIN, FEEDBACK, SUBSCRIBE, WHOAMI)) actions.fillMissingData() else actions.askAgain()
+            when {
+                student.isNew -> actions.start()
+                student.hasMissingData() -> actions.fillMissingData(isMainCmd)
+                else -> when (command) {
+                    CHECKIN -> actions.checkin()
+                    FEEDBACK -> actions.feedback()
+                    SUBSCRIBE -> actions.subscribe()
+                    WHOAMI -> actions.whoIAm()
+                    else -> actions.continueAction()
+                }
             }
 
-            when (command) {
-                CHECKIN -> actions.checkin()
-                FEEDBACK -> actions.feedback()
-                SUBSCRIBE -> actions.subscribe()
-                WHOAMI -> actions.whoIAm()
-                else -> actions.continueAction()
-            }
+            database.executeQueue(student.id)
         } catch (exception: Exception) {
             sendErrorMessage(update.message, exception)
         }

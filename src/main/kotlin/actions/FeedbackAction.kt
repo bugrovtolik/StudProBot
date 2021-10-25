@@ -1,6 +1,7 @@
 package actions
 
 import Bot
+import Database
 import MarkupUtil
 import MessageTexts.NO
 import MessageTexts.OK
@@ -10,7 +11,7 @@ import Student
 import Student.Status.FEEDBACK
 import org.telegram.telegrambots.meta.api.objects.Message
 
-class FeedbackAction(bot: Bot, message: Message, student: Student): Action(bot, message, student) {
+class FeedbackAction(bot: Bot, message: Message, student: Student, database: Database): Action(bot, message, student, database) {
 
     fun ask() {
         sendMessage(student.id, WANNA_FEEDBACK, markup = MarkupUtil.getNoMarkup())

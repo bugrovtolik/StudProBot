@@ -1,8 +1,24 @@
 object MessageTexts {
     const val CHECKIN = "Зачекінитися"
+    const val WHOAMI_CURRENT = "Поточні зустрічі"
+    const val WHOAMI_NEW_STUDENTS = "Нові студенти"
+    const val WHOAMI_RESOURCES = "Корисні матеріали"
+    const val WHOAMI_SHEET = "Гугл таблиця"
+    const val WHOAMI_STAFF = "Особистий кабінет"
+    const val WHOAMI_NOTIFICATIONS_ON = "Увімкнути сповіщення"
+    const val WHOAMI_NOTIFICATIONS_OFF = "Вимкнути сповіщення"
     const val WHOAMI = "ЯХТО"
     const val SUBSCRIBE = "Підписатися на новини"
     const val FEEDBACK = "Залишити відгук"
+    const val DATABASE = "База даних"
+    const val DB_COUNT = "Кількість студентів в Гугл таблиці"
+    const val DB_DOWNLOAD = "Завантажити з Гугл таблиці у БД"
+    const val DB_UPLOAD = "Завантажити з БД до Гугл таблиці"
+    const val DOWNLOADED = "Успішно завантажено %d студентів з Гугл таблиці у внутрішню БД"
+    const val UPLOADED = "Успішно завантажено %d студентів з внутрішньої БД до Гугл таблиці"
+    const val COUNTED = "В Гугл таблиці %d студентів"
+    const val STATS_CHECKINS = "За день чекінів:"
+    const val STATS_NEW_STDS = "Нові студенти:"
     val GREETING = """
         Вітаємо тебе в студентському просторі Campus Ukraine!
         Це сучасний, комфортний, безкоштовний простір для твого навчання та відпочинку, для самостійної роботи або підготовки проєктів з друзями.
@@ -15,7 +31,9 @@ object MessageTexts {
         Якщо ти у нас вперше – заповни, будь ласка, анкету та ознайомся з правилами використання простору.
     """.trimIndent()
     const val ASK_FIRST_NAME = "Як тебе звуть? (тільки ім'я, без фамілії)"
+    const val ASK_FIRST_NAME_AGAIN = "Тільки ім'я, кирилицею, без фамілії"
     const val ASK_LAST_NAME = "А яке в тебе прізвище?"
+    const val ASK_LAST_NAME_AGAIN = "Тільки прізвище, кирилицею"
     const val ASK_UNIVERSITY = "Приємно познайомитися, %s!\nЗ якого ти університету?\n(обери зі списку або напиши)"
     const val ASK_YEAR_STUDY = "А нагадай який ти курс?"
     const val WRONG_YEAR_STUDY = "Просто число від 1 до 6 включно"
@@ -44,20 +62,18 @@ object MessageTexts {
             
             #10 Збитки і шкоду, заподіяні внаслідок дії користувачів, відшкодовуються в повному обсязі :) 
     """.trimIndent()
-    const val AGREE = "Я ознайомлений та погоджуюсь з правилами користування простором"
+    const val AGREE = "Я ознайомлений та погоджуюсь"
     const val FORCE_AGREE = "Правила є правила, перед тим як користуватися Student Prostir ти маєш ознайомитися і погодитися з ними"
     const val FINISH_REGISTRATION = "Це все, дякую тобі, тепер в майбутньому тобі достатньо буде натиснути \"Зачекінитися\"\nWi-Fi - Campus Ukraine\nPassword - StudentProstir2018"
-    const val THANKS = "Дякую, Have Fun! :)"
-    const val WANNA_CHECKIN = "Привіт, %s, ти знаходишся в Student Prostir і бажаєш зачекінитися?"
+    const val THANKS = "Дякую, %s, ти успішно зачекінився! :)"
     const val ALREADY_CHECKED_IN = "Схоже ти вже сьогодні чекінився.."
     const val SUBSCRIBED = "Дякую, ти знайдеш наш телеграм канал за наступним посиланням"
-    const val WANNA_FEEDBACK = "Напиши мені відгук"
+    const val WANNA_FEEDBACK = "Супер, тепер просто напиши або запитай про щось"
     const val RESULT_FEEDBACK = "Дякую, зворотній зв'язок зі студентами допомагає нам вдосконалюватися!"
-    const val OK = "Гаразд"
-    const val YES = "Так"
-    const val NO = "Ні"
-    const val DEFAULT = "Повтори, будь-ласка.."
-    val WHO_I_AM_INFO = """
+    const val EMPTY_WHOAMI_STUDENTS = "Не знайдено поточних яхтошників чи запланових зустрічей за останні 3 тижні"
+    const val RETURN = "Назад"
+    const val ENTER_DATE = "Заповнити дату зустрічі"
+    val WHO_AM_I_AD = """
             Проект ЯХТО
             
             Відбувається вже більше 5 років у різних Campus-містах.
@@ -75,11 +91,14 @@ object MessageTexts {
             
             Зрозумій свої мотиви, дізнайся своє покликання та орієнтири для прийняття рішень. Познайомся зі студентами, які живуть свідомо й активно із ЯХТО!
     """.trimIndent()
-
-    const val WHO_I_AM_MORE_INFO_TEXT = "Більше інформації"
-    const val WHO_I_AM_MORE_INFO_LINK = "http://kyivcampus.tilda.ws/whoiam"
-    const val WHO_I_AM_REGISTRATION_TEXT = "Реєстрація"
-    const val WHO_I_AM_REGISTRATION_LINK = "https://docs.google.com/forms/d/e/1FAIpQLSfWfOBE2w3eFYX250FG4ByQAEMYf540dWMZ1UVycLqbY2lwgg/viewform"
+    const val WHO_AM_I_MORE_INFO_TEXT = "Більше інформації"
+    const val WHO_AM_I_MORE_INFO_LINK = "http://kyivcampus.tilda.ws/whoiam"
+    const val WHO_AM_I_REGISTRATION_TEXT = "Реєстрація"
+    const val WHO_AM_I_REGISTRATION_LINK = "https://docs.google.com/forms/d/e/1FAIpQLSfWfOBE2w3eFYX250FG4ByQAEMYf540dWMZ1UVycLqbY2lwgg/viewform"
+    const val WHO_AM_I_STAFF_LINK = "https://docs.google.com/spreadsheets/d/1ayTBVMtzSMws3VtY4fAG0CSLOkqyzan4awkKulLvejE"
     const val INVITE_CAMPUS_CHANNEL_TEXT = "Підписатися"
     const val INVITE_CAMPUS_CHANNEL_LINK = "https://t.me/joinchat/AAAAAEw7Hu59D_KNUemEnQ"
+    const val DEFAULT = "Список доступних команд"
+    const val SUCCESS = "Успішно, дякую, класно мати тебе в команді :)"
+    val WISHES = listOf("Приємного спілкування!", "Успіхів!", "Гарного вечора!", "Гарно вам посидіти!", "Приємного вечора!", "Цікавого спілкування!")
 }

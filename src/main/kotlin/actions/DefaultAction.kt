@@ -1,15 +1,24 @@
 package actions
 
 import Bot
-import Database
+import MarkupUtil
 import MessageTexts.DEFAULT
-import Student
+import isAdmin
 import org.telegram.telegrambots.meta.api.objects.Message
+import storage.student.Student
+import storage.student.StudentDao.adminChatId
 
-class DefaultAction(bot: Bot, message: Message, student: Student, database: Database): Action(bot, message, student, database) {
+class DefaultAction(bot: Bot, message: Message): Action(bot, message) {
+    fun forwardAdmin(student: Student) {
+        if (!message.chatId.isAdmin()) {
+            editOldMessage(DEFAULT, markup = MarkupUtil.getDefaultMarkup(student))
+            forwardMessage(adminChatId, message.chatId, message.messageId)
+        }
+    }
 
-    fun forwardAdmin() {
-        sendMessage(student.id, DEFAULT, markup = MarkupUtil.getDefaultMarkup())
-        forwardMessage(System.getenv("adminChatId"), student.id, message.messageId)
+    fun mainMenu(student: Student) {
+        student.status = null
+        student.statusParam = null
+        editOldMessage(DEFAULT, markup = MarkupUtil.getDefaultMarkup(student))
     }
 }

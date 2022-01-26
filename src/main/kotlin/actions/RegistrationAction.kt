@@ -1,105 +1,129 @@
 package actions
 
 import Bot
-import Database
+import MarkupUtil
 import MessageTexts.AGREE
 import MessageTexts.ASK_FIRST_NAME
+import MessageTexts.ASK_FIRST_NAME_AGAIN
 import MessageTexts.ASK_LAST_NAME
+import MessageTexts.ASK_LAST_NAME_AGAIN
 import MessageTexts.ASK_RULES
 import MessageTexts.ASK_STUD_PRO
 import MessageTexts.ASK_UNIVERSITY
 import MessageTexts.ASK_YEAR_STUDY
+import MessageTexts.DEFAULT
 import MessageTexts.FINISH_REGISTRATION
 import MessageTexts.FORCE_AGREE
 import MessageTexts.GREETING
 import MessageTexts.RULES
 import MessageTexts.WRONG_YEAR_STUDY
-import Student
-import Student.Status.REGISTRATION
 import org.telegram.telegrambots.meta.api.objects.Message
+import storage.student.Student
+import storage.student.Student.Status.REGISTRATION
+import storage.student.StudentDao
+import java.lang.Character.UnicodeBlock.CYRILLIC
+import java.lang.Character.UnicodeBlock.of
 import java.time.LocalDateTime
 import java.time.temporal.ChronoUnit
 
-class RegistrationAction(bot: Bot, message: Message, student: Student, database: Database): Action(bot, message, student, database) {
+class RegistrationAction(bot: Bot, message: Message): Action(bot, message) {
+    private val feedbackChatId = System.getenv("feedbackChatId")
 
     fun start() {
-        if (student.id == System.getenv("feedbackChatId")) return
-        if (student.status == REGISTRATION.name || !student.isNew) return
+        if (message.chatId.toString() == feedbackChatId) return
 
-        database.addStudent(student.copy(status = REGISTRATION.name))
-        sendMessage(student.id, GREETING, null)
+        sendNewMessage(GREETING)
         askFirstName()
+        StudentDao.save(Student(id = message.chatId, status = REGISTRATION))
     }
 
-    private fun askFirstName() {
-        sendMessage(student.id, ASK_FIRST_NAME, null)
+    private fun askFirstName(again: Boolean = false) {
+        sendNewMessage(if (again) ASK_FIRST_NAME_AGAIN else ASK_FIRST_NAME)
     }
 
-    private fun askLastName(firstName: String? = null) {
-        if (firstName != null) database.updateColumn(Student::firstName, firstName)
-        sendMessage(student.id, ASK_LAST_NAME, null)
-    }
-
-    private fun askUniversity(lastName: String? = null) {
-        if (lastName != null) database.updateColumn(Student::lastName, lastName)
-        sendMessage(student.id, ASK_UNIVERSITY.format(student.firstName), markup = MarkupUtil.getUniversitiesMarkup())
-    }
-
-    private fun askYearStudy(university: String? = null) {
-        if (university != null) database.updateColumn(Student::university, university)
-        sendMessage(student.id, ASK_YEAR_STUDY, markup = MarkupUtil.getYearStudyMarkup())
-    }
-
-    private fun askStudPro(yearStudy: String? = null) {
-        if (yearStudy?.toIntOrNull() in 1..6) {
-            if (yearStudy != null) database.updateColumn(Student::yearStudy, yearStudy)
-            sendMessage(student.id, ASK_STUD_PRO, markup = MarkupUtil.getStudProMarkup())
-        } else {
-            sendMessage(student.id, WRONG_YEAR_STUDY, markup = MarkupUtil.getYearStudyMarkup())
+    private fun askLastName(student: Student, firstName: String? = null, again: Boolean = false) {
+        if (firstName != null) {
+            if (firstName.all { of(it) == CYRILLIC || it in "'`-"}) {
+                student.firstName = firstName
+            } else {
+                return askFirstName(again = true)
+            }
         }
+
+        sendNewMessage(if (again) ASK_LAST_NAME_AGAIN else ASK_LAST_NAME)
     }
 
-    private fun askRules(studProInfo: String? = null) {
-        if (studProInfo != null) database.updateColumn(Student::studProInfo, studProInfo)
-        sendMessage(student.id, ASK_RULES, null)
-        sendMessage(student.id, RULES, markup = MarkupUtil.getAgreeRulesMarkup())
+    private fun askUniversity(student: Student, lastName: String? = null) {
+        if (lastName != null) {
+            if (lastName.all { of(it) == CYRILLIC  || it in "'`- " }) {
+                student.lastName = lastName
+            } else {
+                return askLastName(student, again = true)
+            }
+        }
+
+        sendNewMessage(ASK_UNIVERSITY.format(student.firstName), markup = MarkupUtil.getUniversitiesMarkup())
     }
 
-    private fun finish(rules: String? = null) {
+    private fun askYearStudy(student: Student, university: String? = null) {
+        if (university != null) student.university = university
+        editOldMessage(ASK_YEAR_STUDY, markup = MarkupUtil.getYearStudyMarkup())
+    }
+
+    private fun askStudPro(student: Student, yearStudy: String? = null) {
+        if (yearStudy != null) {
+            if (yearStudy.toIntOrNull() in 1..6) {
+                student.yearStudy = yearStudy.toInt()
+            } else {
+                return editOldMessage(WRONG_YEAR_STUDY, markup = MarkupUtil.getYearStudyMarkup())
+            }
+        }
+
+        editOldMessage(ASK_STUD_PRO, markup = MarkupUtil.getStudProMarkup())
+    }
+
+    private fun askRules(student: Student, studProInfo: String? = null) {
+        if (studProInfo != null) student.studProInfo = studProInfo
+        editOldMessage(RULES, markup = MarkupUtil.getAgreeRulesMarkup())
+        sendNewMessage(ASK_RULES)
+    }
+
+    private fun finish(student: Student, rules: String? = null) {
         if (rules == null || rules == AGREE) {
-            val registerDate = LocalDateTime.now().truncatedTo(ChronoUnit.MINUTES).toString()
+            val registerDate = LocalDateTime.now().truncatedTo(ChronoUnit.MINUTES)
 
-            database.updateColumn(Student::registerDate, registerDate)
-            database.updateColumn(Student::lastCheckinDate, registerDate)
-            database.updateColumn(Student::checkinCount, "1")
-            deleteStatus()
+            student.registerDate = registerDate
+            student.lastCheckinDate = registerDate
+            student.checkinCount = 1
+            student.status = null
 
-            sendMessage(student.id, FINISH_REGISTRATION)
+            editOldMessage(FINISH_REGISTRATION)
+            sendNewMessage(DEFAULT, markup = MarkupUtil.getDefaultMarkup(student))
         } else {
-            sendMessage(student.id, FORCE_AGREE, markup = MarkupUtil.getAgreeRulesMarkup())
+            editOldMessage(FORCE_AGREE, markup = MarkupUtil.getAgreeRulesMarkup())
         }
     }
 
-    fun saveAskNext() {
+    fun saveAskNext(student: Student) {
         when {
-            student.firstName.isNullOrBlank() -> askLastName(firstName = message.text)
-            student.lastName.isNullOrBlank() -> askUniversity(lastName = message.text)
-            student.university.isNullOrBlank() -> askYearStudy(university = message.text)
-            student.yearStudy.isNullOrBlank() -> askStudPro(yearStudy = message.text)
-            student.studProInfo.isNullOrBlank() -> askRules(studProInfo = message.text)
-            else -> finish(rules = message.text)
+            student.firstName.isNullOrBlank() -> askLastName(student, firstName = message.text)
+            student.lastName.isNullOrBlank() -> askUniversity(student, lastName = message.text)
+            student.university.isNullOrBlank() -> askYearStudy(student, university = message.text)
+            student.yearStudy == null -> askStudPro(student, yearStudy = message.text)
+            student.studProInfo.isNullOrBlank() -> askRules(student, studProInfo = message.text)
+            else -> finish(student, rules = message.text)
         }
     }
 
-    fun askAgain() {
-        if (student.status != REGISTRATION.name) saveStatus(REGISTRATION)
+    fun askAgain(student: Student) {
+        if (student.status != REGISTRATION) student.status = REGISTRATION
         when {
             student.firstName.isNullOrBlank() -> askFirstName()
-            student.lastName.isNullOrBlank() -> askLastName()
-            student.university.isNullOrBlank() -> askUniversity()
-            student.yearStudy.isNullOrBlank() -> askYearStudy()
-            student.studProInfo.isNullOrBlank() -> askStudPro()
-            else -> finish()
+            student.lastName.isNullOrBlank() -> askLastName(student)
+            student.university.isNullOrBlank() -> askUniversity(student)
+            student.yearStudy == null -> askYearStudy(student)
+            student.studProInfo.isNullOrBlank() -> askStudPro(student)
+            else -> finish(student)
         }
     }
 }

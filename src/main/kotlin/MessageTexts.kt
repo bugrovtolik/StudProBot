@@ -91,6 +91,8 @@ object MessageTexts {
             
             Зрозумій свої мотиви, дізнайся своє покликання та орієнтири для прийняття рішень. Познайомся зі студентами, які живуть свідомо й активно із ЯХТО!
     """.trimIndent()
+    private const val WHO_AM_I_FEEDBACK_LINK = "https://docs.google.com/forms/d/e/1FAIpQLSfcB8c6tfIkZOtdTDhOvrCl9Z6QlPP4IhTiJ2DC2uLtmYywBg/viewform"
+    const val WHO_AM_I_FEEDBACK_INVITE = "скинути посилання на [гугл форму відгуку]($WHO_AM_I_FEEDBACK_LINK) та запропонувати проходити степапи"
     const val WHO_AM_I_MORE_INFO_TEXT = "Більше інформації"
     const val WHO_AM_I_MORE_INFO_LINK = "http://kyivcampus.tilda.ws/whoiam"
     const val WHO_AM_I_REGISTRATION_TEXT = "Реєстрація"

@@ -59,19 +59,18 @@ object GoogleSheetsApi {
         val volunteersNames = (volunteers ?: StudentDao.findAllVolunteers()).associateBy { it.firstName + " " + it.lastName }
         val students = getSheets().spreadsheets().values()[documentId, whoamiSheet].execute()["values"] as List<*>
 
-        return students.drop(1).filterIsInstance<List<String>>().filter { getRejected || it.getOrNull(9) != "TRUE" }.map { row ->
+        return students.drop(1).filterIsInstance<List<String>>().filter { getRejected || it.getOrNull(9) != "TRUE" }.mapNotNull { row ->
             WhoAmIStudent(
                 registerDate = row.getOrNull(0)?.let { try { LocalDateTime.parse(it, timeFormatter) } catch (e: Exception) { null } },
-                fullName = row.getOrNull(1) ?: "",
+                fullName = row.getOrNull(1)?.takeIf { it.isNotBlank() } ?: return@mapNotNull null,
                 firstPilot = row.getOrNull(3)?.takeIf { it.isNotBlank() }?.let { volunteersNames[it] },
                 contactedDate = row.getOrNull(5)?.parseOrNull(dateFormatter),
                 firstMeetingDate = row.getOrNull(6)?.parseOrNull(dateFormatter),
                 secondMeetingDate = row.getOrNull(7)?.parseOrNull(dateFormatter),
                 thirdMeetingDate = row.getOrNull(8)?.parseOrNull(dateFormatter),
-                firstFollowUpDate = row.getOrNull(10)?.parseOrNull(dateFormatter),
-                secondFollowUpDate = row.getOrNull(11)?.parseOrNull(dateFormatter),
-                thirdFollowUpDate = row.getOrNull(12)?.parseOrNull(dateFormatter),
-                fourthFollowUpDate = row.getOrNull(13)?.parseOrNull(dateFormatter),
+                firstStepUpDate = row.getOrNull(10)?.parseOrNull(dateFormatter),
+                secondStepUpDate = row.getOrNull(11)?.parseOrNull(dateFormatter),
+                thirdStepUpDate = row.getOrNull(12)?.parseOrNull(dateFormatter),
                 phoneNumber = row.getOrNull(14),
                 socialNetworks = row.getOrNull(15)
             )

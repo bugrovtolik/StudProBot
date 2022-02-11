@@ -5,7 +5,7 @@ import MarkupUtil
 import org.telegram.telegrambots.meta.api.methods.ForwardMessage
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage
 import org.telegram.telegrambots.meta.api.methods.send.SendPhoto
-import org.telegram.telegrambots.meta.api.methods.updatingmessages.EditMessageText
+import org.telegram.telegrambots.meta.api.methods.updatingmessages.DeleteMessage
 import org.telegram.telegrambots.meta.api.objects.InputFile
 import org.telegram.telegrambots.meta.api.objects.Message
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.InlineKeyboardMarkup
@@ -13,25 +13,24 @@ import storage.student.Student
 
 abstract class Action(private val bot: Bot, protected val message: Message) {
 
-    protected fun editOldMessage(msgTxt: String, markup: InlineKeyboardMarkup? = null) {
-        if (markup == message.replyMarkup && msgTxt == message.caption) return
-        val editMsg = EditMessageText()
-        editMsg.chatId = message.chatId.toString()
-        editMsg.messageId = message.messageId
-        editMsg.text = msgTxt
-        editMsg.replyMarkup = markup
-        try { bot.execute(editMsg) } catch (e: Exception) { sendNewMessage(msgTxt, markup) }
+    protected fun editOldMessage(msgTxt: String, markup: InlineKeyboardMarkup? = null, parseMode: String? = null) {
+        sendNewMessage(message.chatId, msgTxt, markup, parseMode)
+
+        val deleteMessage = DeleteMessage(message.chatId.toString(), message.messageId)
+        try { bot.execute(deleteMessage) } catch (e: Exception) {}
     }
 
     protected fun sendNewMessage(msgTxt: String, markup: InlineKeyboardMarkup? = null) {
         sendNewMessage(message.chatId, msgTxt, markup)
     }
 
-    protected fun sendNewMessage(chatId: Long, msgTxt: String, markup: InlineKeyboardMarkup? = null) {
+    protected fun sendNewMessage(chatId: Long, msgTxt: String, markup: InlineKeyboardMarkup? = null, parseMode: String? = null) {
         val sendMsg = SendMessage()
         sendMsg.chatId = chatId.toString()
         sendMsg.text = msgTxt
         sendMsg.replyMarkup = markup
+        sendMsg.parseMode = parseMode
+        sendMsg.disableWebPagePreview = true
         bot.execute(sendMsg)
     }
 

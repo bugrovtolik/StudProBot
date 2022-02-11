@@ -36,10 +36,9 @@ class SheetsDatabase {
         WhoAmIStudent::firstMeetingDate to "G",
         WhoAmIStudent::secondMeetingDate to "H",
         WhoAmIStudent::thirdMeetingDate to "I",
-        WhoAmIStudent::firstFollowUpDate to "K",
-        WhoAmIStudent::secondFollowUpDate to "L",
-        WhoAmIStudent::thirdFollowUpDate to "M",
-        WhoAmIStudent::fourthFollowUpDate to "N"
+        WhoAmIStudent::firstStepUpDate to "K",
+        WhoAmIStudent::secondStepUpDate to "L",
+        WhoAmIStudent::thirdStepUpDate to "M"
     )
 
     fun updateCheckins(studentsFromDb: Set<Student>, studentsFromSheet: Set<Student>): DayStatistics {

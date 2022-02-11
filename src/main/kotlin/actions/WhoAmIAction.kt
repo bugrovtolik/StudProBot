@@ -11,7 +11,9 @@ import MessageTexts.SUCCESS
 import MessageTexts.WHOAMI_RESOURCES
 import MessageTexts.WHOAMI_STAFF
 import MessageTexts.WHO_AM_I_AD
+import MessageTexts.WHO_AM_I_FEEDBACK_INVITE
 import MessageTexts.WISHES
+import org.telegram.telegrambots.meta.api.methods.ParseMode.MARKDOWNV2
 import org.telegram.telegrambots.meta.api.objects.Message
 import storage.SheetsDatabase
 import storage.student.Student
@@ -40,10 +42,9 @@ class WhoAmIAction(bot: Bot, message: Message): Action(bot, message) {
                     student.firstMeetingDate == now -> "Першу зустріч"
                     student.secondMeetingDate == now -> "Другу зустріч"
                     student.thirdMeetingDate == now -> "Третю зустріч"
-                    student.firstFollowUpDate == now -> "Перший фолоу-ап"
-                    student.secondFollowUpDate == now -> "Другий фолоу-ап"
-                    student.thirdFollowUpDate == now -> "Третій фолоу-ап"
-                    student.fourthFollowUpDate == now -> "Четвертий фолоу-ап"
+                    student.firstStepUpDate == now -> "Перший степап"
+                    student.secondStepUpDate == now -> "Другий степап"
+                    student.thirdStepUpDate == now -> "Третій степап"
                     else -> return@forEach
                 }
                 msg.append("$text з ${student.fullName}\n")
@@ -67,14 +68,19 @@ class WhoAmIAction(bot: Bot, message: Message): Action(bot, message) {
 
         volunteers.filter { it.allowNotifications }.forEach volunteers@{ volunteer ->
             var hadMeetings = false
+            var finishedWhoAmI = false
             whoamiStudents.filter { it.firstPilot?.id == volunteer.id && it.isRelevant(now) }.forEach { student ->
                 if (listOf(
                     student.firstMeetingDate, student.secondMeetingDate, student.thirdMeetingDate,
-                    student.firstFollowUpDate, student.secondFollowUpDate, student.thirdFollowUpDate
+                    student.firstStepUpDate, student.secondStepUpDate, student.thirdStepUpDate
                 ).any { it == now }) hadMeetings = true
+                if (student.thirdMeetingDate == now) finishedWhoAmI = true
             }
 
-            if (hadMeetings) sendNewMessage(volunteer.id, text, markup = MarkupUtil.getEnterDateReturnMarkup())
+            if (hadMeetings) {
+                if (finishedWhoAmI) sendNewMessage(volunteer.id, "$text\nВітаю також з завершенням ЯХТО, не забудь $WHO_AM_I_FEEDBACK_INVITE", markup = MarkupUtil.getEnterDateReturnMarkup(), parseMode = MARKDOWNV2)
+                else sendNewMessage(volunteer.id, text, markup = MarkupUtil.getEnterDateReturnMarkup())
+            }
         }
     }
 
@@ -120,10 +126,9 @@ class WhoAmIAction(bot: Bot, message: Message): Action(bot, message) {
             student.firstMeetingDate == null -> "першої зустрічі"
             student.secondMeetingDate == null -> "другої зустрічі"
             student.thirdMeetingDate == null -> "третьої зустрічі"
-            student.firstFollowUpDate == null -> "першого фолоу-апу"
-            student.secondFollowUpDate == null -> "другого фолоу-апу"
-            student.thirdFollowUpDate == null -> "третього фолоу-апу"
-            student.fourthFollowUpDate == null -> "четвертого фолоу-апу"
+            student.firstStepUpDate == null -> "першого степапу"
+            student.secondStepUpDate == null -> "другого степапу"
+            student.thirdStepUpDate == null -> "третього степапу"
             else -> return editOldMessage("У обраного студента немає незаповнених дат зустрічей", markup = MarkupUtil.getReturnMarkup())
         }
 
@@ -157,10 +162,9 @@ class WhoAmIAction(bot: Bot, message: Message): Action(bot, message) {
             student.firstMeetingDate == null -> WhoAmIStudent::firstMeetingDate
             student.secondMeetingDate == null -> WhoAmIStudent::secondMeetingDate
             student.thirdMeetingDate == null -> WhoAmIStudent::thirdMeetingDate
-            student.firstFollowUpDate == null -> WhoAmIStudent::firstFollowUpDate
-            student.secondFollowUpDate == null -> WhoAmIStudent::secondFollowUpDate
-            student.thirdFollowUpDate == null -> WhoAmIStudent::thirdFollowUpDate
-            student.fourthFollowUpDate == null -> WhoAmIStudent::fourthFollowUpDate
+            student.firstStepUpDate == null -> WhoAmIStudent::firstStepUpDate
+            student.secondStepUpDate == null -> WhoAmIStudent::secondStepUpDate
+            student.thirdStepUpDate == null -> WhoAmIStudent::thirdStepUpDate
             else -> return editOldMessage("У обраного студента немає незаповнених дат зустрічей", markup = MarkupUtil.getReturnMarkup())
         }
 
@@ -189,24 +193,22 @@ class WhoAmIAction(bot: Bot, message: Message): Action(bot, message) {
         students.forEach {
             when {
                 it.contactedDate == null -> msg.append("${it.fullName}: познайомитися і розказати про ЯХТО\n")
-                it.firstMeetingDate == null -> msg.append("${it.fullName}: запропонувати першу зустріч\n")
+                it.firstMeetingDate == null -> msg.append("${it.fullName}: запропонувати першу зустріч ЯХТО\n")
                 it.firstMeetingDate > now -> msg.append("${it.fullName}: перша зустріч ${it.firstMeetingDate.format(dateFormatter)}\n")
-                it.secondMeetingDate == null -> msg.append("${it.fullName}: запропонувати другу зустріч\n")
+                it.secondMeetingDate == null -> msg.append("${it.fullName}: запропонувати другу зустріч ЯХТО\n")
                 it.secondMeetingDate > now -> msg.append("${it.fullName}: друга зустріч ${it.secondMeetingDate.format(dateFormatter)}\n")
-                it.thirdMeetingDate == null -> msg.append("${it.fullName}: запропонувати третю зустріч\n")
+                it.thirdMeetingDate == null -> msg.append("${it.fullName}: запропонувати третю зустріч ЯХТО\n")
                 it.thirdMeetingDate > now -> msg.append("${it.fullName}: третя зустріч ${it.thirdMeetingDate.format(dateFormatter)}\n")
-                it.firstFollowUpDate == null -> msg.append("${it.fullName}: запропонувати проходити фолоу-апи\n")
-                it.firstFollowUpDate > now -> msg.append("${it.fullName}: перший фолоу-ап ${it.firstFollowUpDate.format(dateFormatter)}\n")
-                it.secondFollowUpDate == null -> msg.append("${it.fullName}: запропонувати другий фолоу-ап\n")
-                it.secondFollowUpDate > now -> msg.append("${it.fullName}: другий фолоу-ап ${it.secondFollowUpDate.format(dateFormatter)}\n")
-                it.thirdFollowUpDate == null -> msg.append("${it.fullName}: запропонувати третій фолоу-ап\n")
-                it.thirdFollowUpDate > now -> msg.append("${it.fullName}: третій фолоу-ап ${it.thirdFollowUpDate.format(dateFormatter)}\n")
-                it.fourthFollowUpDate == null -> msg.append("${it.fullName}: запропонувати четвертий фолоу-ап\n")
-                it.fourthFollowUpDate > now -> msg.append("${it.fullName}: четвертий фолоу-ап ${it.fourthFollowUpDate.format(dateFormatter)}\n")
+                it.firstStepUpDate == null -> msg.append("${it.fullName}: $WHO_AM_I_FEEDBACK_INVITE\n")
+                it.firstStepUpDate > now -> msg.append("${it.fullName}: перший степап ${it.firstStepUpDate.format(dateFormatter)}\n")
+                it.secondStepUpDate == null -> msg.append("${it.fullName}: запропонувати другий степап\n")
+                it.secondStepUpDate > now -> msg.append("${it.fullName}: другий степап ${it.secondStepUpDate.format(dateFormatter)}\n")
+                it.thirdStepUpDate == null -> msg.append("${it.fullName}: запропонувати третій степап\n")
+                it.thirdStepUpDate > now -> msg.append("${it.fullName}: третій степап ${it.thirdStepUpDate.format(dateFormatter)}\n")
             }
         }
 
         val resultMsg = msg.toString().takeIf { it.isNotEmpty() } ?: EMPTY_WHOAMI_STUDENTS
-        editOldMessage(resultMsg, markup = MarkupUtil.getReturnMarkup())
+        editOldMessage(resultMsg, markup = MarkupUtil.getReturnMarkup(), parseMode = MARKDOWNV2)
     }
 }

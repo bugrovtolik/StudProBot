@@ -12,16 +12,13 @@ data class WhoAmIStudent(
     val firstMeetingDate: LocalDate?,
     val secondMeetingDate: LocalDate?,
     val thirdMeetingDate: LocalDate?,
-    val firstFollowUpDate: LocalDate?,
-    val secondFollowUpDate: LocalDate?,
-    val thirdFollowUpDate: LocalDate?,
-    val fourthFollowUpDate: LocalDate?,
+    val firstStepUpDate: LocalDate?,
+    val secondStepUpDate: LocalDate?,
+    val thirdStepUpDate: LocalDate?,
     val phoneNumber: String?,
     val socialNetworks: String?
 ) {
-    fun getLastDate() = fourthFollowUpDate
-        ?: thirdFollowUpDate ?: secondFollowUpDate ?: firstFollowUpDate
-        ?: thirdMeetingDate ?: secondMeetingDate ?: firstMeetingDate ?: contactedDate
+    fun getLastDate() = thirdStepUpDate ?: secondStepUpDate ?: firstStepUpDate ?: thirdMeetingDate ?: secondMeetingDate ?: firstMeetingDate ?: contactedDate
 
     fun isRelevant(today: LocalDate): Boolean {
         val lastDate = getLastDate() ?: return true

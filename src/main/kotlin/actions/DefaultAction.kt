@@ -11,8 +11,8 @@ import storage.student.StudentDao.adminChatId
 class DefaultAction(bot: Bot, message: Message): Action(bot, message) {
     fun forwardAdmin(student: Student) {
         if (!message.chatId.isAdmin()) {
-            editOldMessage(DEFAULT, markup = MarkupUtil.getDefaultMarkup(student))
             forwardMessage(adminChatId, message.chatId, message.messageId)
+            editOldMessage(DEFAULT, markup = MarkupUtil.getDefaultMarkup(student))
         }
     }
 

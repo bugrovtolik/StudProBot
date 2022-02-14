@@ -35,9 +35,9 @@ object MarkupUtil {
         val buttons = mutableListOf<String>()
         with(buttons) {
             add(CHECKIN)
-            if (student.isStaff) add(WHOAMI_STAFF) else add(WHOAMI)
+            add(WHOAMI)
             add(SUBSCRIBE)
-            add(FEEDBACK)
+            if (student.isStaff) add(WHOAMI_STAFF) else add(FEEDBACK)
             if (student.id.isAdmin()) add(DATABASE)
         }
 

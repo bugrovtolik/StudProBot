@@ -1,6 +1,7 @@
 package storage
 
 import GoogleSheetsApi.checkinsSheet
+import GoogleSheetsApi.dateFormatter
 import GoogleSheetsApi.documentId
 import GoogleSheetsApi.getSheets
 import GoogleSheetsApi.whoamiSheet
@@ -9,6 +10,7 @@ import com.google.api.services.sheets.v4.model.ValueRange
 import storage.SheetsDatabase.CheckinUpdates.Property
 import storage.student.Student
 import storage.student.WhoAmIStudent
+import java.time.LocalDate
 import kotlin.reflect.KProperty
 import kotlin.reflect.KProperty1
 
@@ -64,10 +66,10 @@ class SheetsDatabase {
         return statistics.apply { updatedCount = updateQueue.map { it.studentId }.toSet().size }
     }
 
-    fun updateWhoAmIStudent(stdIndex: Int, property: KProperty<*>, value: Any?) {
+    fun updateWhoAmIStudent(stdIndex: Int, property: KProperty<*>, value: LocalDate) {
         val row = if (stdIndex >= 0) stdIndex + 2 else return
         val column = whoamiColumns[property] ?: throw IllegalArgumentException()
-        val data = ValueRange().setValues(listOf(listOf(value?.toString() ?: "")))
+        val data = ValueRange().setValues(listOf(listOf(value.format(dateFormatter))))
         getSheets().spreadsheets().values().update(documentId, "$whoamiSheet!$column$row", data).setValueInputOption("USER_ENTERED").execute()
     }
 

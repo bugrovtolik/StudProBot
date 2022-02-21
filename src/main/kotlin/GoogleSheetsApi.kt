@@ -63,7 +63,7 @@ object GoogleSheetsApi {
             WhoAmIStudent(
                 registerDate = row.getOrNull(0)?.let { try { LocalDateTime.parse(it, timeFormatter) } catch (e: Exception) { null } },
                 fullName = row.getOrNull(1)?.takeIf { it.isNotBlank() } ?: return@mapNotNull null,
-                firstPilot = row.getOrNull(3)?.takeIf { it.isNotBlank() }?.let { volunteersNames[it] ?: return@mapNotNull null },
+                firstPilot = row.getOrNull(3)?.takeIf { it.isNotBlank() }?.let { volunteersNames[it] },
                 contactedDate = row.getOrNull(5)?.parseOrNull(dateFormatter),
                 firstMeetingDate = row.getOrNull(6)?.parseOrNull(dateFormatter),
                 secondMeetingDate = row.getOrNull(7)?.parseOrNull(dateFormatter),

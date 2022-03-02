@@ -34,7 +34,7 @@ class DatabaseAction(bot: Bot, message: Message): Action(bot, message) {
         val stats = database.updateCheckins(studentsFromDatabase, studentsFromSheets)
 
         if (scheduled) {
-            if (stats.newStudents.isEmpty()) return sendNewMessage(adminChatId.toLong(), "$STATS_CHECKINS ${stats.checkins}")
+            if (stats.newStudents < 10) return
 
             val newStudents = stats.newStudents.joinToString("\n") { it.firstName + " " + it.lastName }
             sendNewMessage(
